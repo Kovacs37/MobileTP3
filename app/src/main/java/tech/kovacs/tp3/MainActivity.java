@@ -9,22 +9,27 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.BaseAdapter;
+import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.ListView;
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity {
 
     ListView listview;
+    Button valider;
     PlaneteAdapter adapter;
 
     Data dt;
 
-
+    public void popUp(String message) {
+        Toast.makeText(this, message, Toast.LENGTH_LONG).show();
+    }
 
 
 
@@ -37,65 +42,51 @@ public class MainActivity extends AppCompatActivity {
 
         setContentView(R.layout.activity_main);
         listview = (ListView) findViewById(R.id.listView);
-
+        valider = (Button) findViewById(R.id.valider);
+        valider.setOnClickListener(validerOnClickListener);
+        valider.setEnabled(false);
         dt = new Data();
-        adapter = new PlaneteAdapter();
+        adapter = new PlaneteAdapter(this, dt);
         listview.setAdapter(adapter);
+
     }
 
 
+    View.OnClickListener validerOnClickListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            // do something
+            if(verifTailles()){
+                popUp("ok");
+            }else popUp("fail.");
 
-
-
-class PlaneteAdapter extends BaseAdapter {
-    @Override
-    public int getCount() {
-        return dt.getPlanetes().size();
-    }
-
-    @Override
-    public Object getItem(int arg0) {
-        return dt.getPlanetes().get(arg0);
-    }
-
-    @Override
-    public long getItemId(int position) {
-        return 0;
-    }
-    @Override
-    public View getView(int position, View convertView, ViewGroup parent) {
-        View itemView = convertView;
-        if (convertView == null) {
-            LayoutInflater inflater = (LayoutInflater)    MainActivity.this.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            itemView = inflater.inflate(R.layout.listitem, null);
         }
-        TextView nomPlanete = (TextView) itemView.findViewById(R.id.textView);
-        final CheckBox checkBox = (CheckBox) itemView.findViewById(R.id.checkbox);
-        final Spinner spinner = (Spinner) itemView.findViewById(R.id.spinner);
-        nomPlanete.setText(dt.getPlanetes().get(position));
-        //  installer l'adaptateur pour la liste déroulante (spinner)
-        String[] taillePlanetes = {"4900", "12000", "12800", "6800", "144000", "120000", "52000", "50000", "2300"};
-        final ArrayAdapter<String> spinadapter = new ArrayAdapter<String>(MainActivity.this, android.R.layout.simple_spinner_item, taillePlanetes);
-        spinadapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        spinner.setAdapter(spinadapter);
+    };
 
-        checkBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
-                CheckBox checkBox = (CheckBox) compoundButton.findViewById(R.id.checkbox);
-                spinner.setEnabled(!checkBox.isChecked());
-                spinadapter.notifyDataSetChanged();
+
+
+    public boolean verifTailles(){
+
+        // for some reason it's impossible to do a foreach with a listView, so back to the good old for
+        //for(View va : listview)
+
+
+        for(int i =0;i<listview.getCount();++i){
+
+            if(Integer.parseInt(((Spinner) (listview.getChildAt(i)).findViewById(R.id.spinner)).getSelectedItem().toString()) !=(dt.getTaille(dt.getPlanete(i))))
+            {
+
+                //popUp("i : " + i + " " + dt.getTaille(dt.getPlanete(i)) + " comp " + ((Spinner) (listview.getChildAt(i)).findViewById(R.id.spinner)).getSelectedItem().toString());
+               return false;
             }
-        });
-
-
-
-
-        return itemView;
+        }
+        return true;
     }
 
 
 
 
-}
+
+
+
 }
